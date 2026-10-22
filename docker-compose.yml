@@ -1,5 +1,8 @@
 services:
 
+  # ==================================
+  # 1. MYSQL DATABASE
+  # ==================================
   db:
     image: mysql:8.4
     restart: unless-stopped
@@ -25,6 +28,10 @@ services:
       retries: 10
       start_period: 30s
 
+
+  # ==================================
+  # 2. WORDPRESS CMS
+  # ==================================
   wordpress:
     image: wordpress:php8.3-apache
     restart: unless-stopped
@@ -38,7 +45,7 @@ services:
       WORDPRESS_DB_USER: ${MYSQL_USER}
       WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
       WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
-   
+
     volumes:
       - wordpress_data:/var/www/html
 
@@ -46,6 +53,10 @@ services:
       - cms_frontend
       - cms_backend
 
+
+  # ==================================
+  # 3. PHPMYADMIN
+  # ==================================
   phpmyadmin:
     image: phpmyadmin:5.2
     restart: unless-stopped
@@ -65,6 +76,10 @@ services:
       - cms_frontend
       - cms_backend
 
+
+  # ==================================
+  # 4. NGINX REVERSE PROXY
+  # ==================================
   nginx:
     image: nginxinc/nginx-unprivileged:stable-alpine
     container_name: blog-cms-nginx
@@ -82,7 +97,111 @@ services:
     networks:
       - cms_frontend
 
+
+  # ==================================
+  # 5. PROMETHEUS MONITORING
+  # ==================================
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    restart: unless-stopped
+
+    ports:
+      - "127.0.0.1:9090:9090"
+
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=7d"
+
+    networks:
+      - cms_monitoring
+
+  # ==================================
+  # 6. CADVISOR - CONTAINER MONITORING
+  # ==================================
+  cadvisor:
+    image: ghcr.io/google/cadvisor:0.55.1
+    restart: unless-stopped
+
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+
+    networks:
+      - cms_monitoring
+  # ==================================
+  # 8. MYSQL EXPORTER - DB MONITORING
+  # ==================================
+  mysql-exporter:
+    image: prom/mysqld-exporter:v0.19.0
+    restart: unless-stopped
+
+    environment:
+      MYSQLD_EXPORTER_PASSWORD: ${MYSQL_EXPORTER_PASSWORD:?MYSQL_EXPORTER_PASSWORD_is_required}
+
+    command:
+      - "--mysqld.address=db:3306"
+      - "--mysqld.username=exporter"
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+    networks:
+      - cms_backend
+      - cms_monitoring
+  # ==================================
+  # 9. GRAFANA - MONITORING DASHBOARD
+  # ==================================
+  grafana:
+    image: grafana/grafana:13.2.2
+    restart: unless-stopped
+
+    environment:
+      GF_SECURITY_ADMIN_USER: cmsadmin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?GRAFANA_ADMIN_PASSWORD_required}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+
+    ports:
+      - "127.0.0.1:3000:3000"
+
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+    depends_on:
+      - prometheus
+
+    networks:
+      - cms_monitoring
+  # ==================================
+  # 7. NGINX EXPORTER - WEB MONITORING
+  # ==================================
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:1.5.3
+    restart: unless-stopped
+
+    command:
+      - "--nginx.scrape-uri=http://nginx:8081/stub_status"
+
+    depends_on:
+      - nginx
+
+    networks:
+      - cms_frontend
+      - cms_monitoring
+# ==================================
+# DOCKER NETWORKS
+# ==================================
 networks:
+
   cms_frontend:
     driver: bridge
 
@@ -90,7 +209,15 @@ networks:
     driver: bridge
     internal: true
 
+  cms_monitoring:
+    driver: bridge
 
+
+# ==================================
+# DOCKER VOLUMES
+# ==================================
 volumes:
   mysql_data:
   wordpress_data:
+  prometheus_data:
+  grafana_data:

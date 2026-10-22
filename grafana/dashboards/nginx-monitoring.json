@@ -1,0 +1,432 @@
+{
+  "id": null,
+  "uid": "blogcms-nginx-monitoring",
+  "title": "Blog CMS - Nginx Monitoring",
+  "tags": [
+    "blog-cms",
+    "monitoring",
+    "nginx"
+  ],
+  "timezone": "browser",
+  "schemaVersion": 42,
+  "version": 0,
+  "refresh": "15s",
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "templating": {
+    "list": []
+  },
+  "annotations": {
+    "list": []
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Nginx HTTP Request Rate",
+      "type": "timeseries",
+      "pluginVersion": "13.2.2",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "fg20su56ob8jka"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(nginx_http_requests_total{job=~\"nginx.*\"}[5m]))",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "fg20su56ob8jka"
+          },
+          "editorMode": "code",
+          "legendFormat": "HTTP requests/s",
+          "range": true,
+          "instant": false,
+          "hide": false
+        }
+      ],
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "Nginx Active Connections",
+      "type": "timeseries",
+      "pluginVersion": "13.2.2",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "fg20su56ob8jka"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "nginx_connections_active{job=~\"nginx.*\"}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "fg20su56ob8jka"
+          },
+          "editorMode": "code",
+          "legendFormat": "Active connections",
+          "range": true,
+          "instant": false,
+          "hide": false
+        }
+      ],
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "Nginx Status",
+      "type": "stat",
+      "pluginVersion": "13.2.2",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "fg20su56ob8jka"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "nginx_up{job=~\"nginx.*\"}",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "fg20su56ob8jka"
+          },
+          "editorMode": "code",
+          "legendFormat": "",
+          "range": false,
+          "instant": true,
+          "hide": false
+        }
+      ],
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "DOWN",
+                  "color": "red"
+                },
+                "1": {
+                  "text": "UP",
+                  "color": "green"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      }
+    },
+    {
+      "id": 4,
+      "title": "Nginx Connection States",
+      "type": "timeseries",
+      "pluginVersion": "13.2.2",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "fg20su56ob8jka"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "nginx_connections_reading",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "fg20su56ob8jka"
+          },
+          "editorMode": "code",
+          "legendFormat": "Reading",
+          "range": true,
+          "instant": false,
+          "hide": false
+        },
+        {
+          "refId": "B",
+          "expr": "nginx_connections_writing",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "fg20su56ob8jka"
+          },
+          "editorMode": "code",
+          "legendFormat": "Writing",
+          "range": true,
+          "instant": false,
+          "hide": false
+        },
+        {
+          "refId": "C",
+          "expr": "nginx_connections_waiting",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "fg20su56ob8jka"
+          },
+          "editorMode": "code",
+          "legendFormat": "Waiting",
+          "range": true,
+          "instant": false,
+          "hide": false
+        }
+      ],
+      "gridPos": {
+        "x": 12,
+        "y": 8,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      }
+    }
+  ],
+  "editable": true
+}
