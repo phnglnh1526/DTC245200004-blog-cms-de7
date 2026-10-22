@@ -1,0 +1,44 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: blog-cms-docker
+
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 10s
+
+    relabel_configs:
+      # Chi thu thap container thuoc du an Blog CMS
+      - source_labels:
+          - __meta_docker_container_label_com_docker_compose_project
+        regex: blog-cms-de7
+        action: keep
+
+      # Chi thu thap WordPress, MySQL va Nginx
+      - source_labels:
+          - __meta_docker_container_label_com_docker_compose_service
+        regex: wordpress|db|nginx
+        action: keep
+
+      # Gan nhan ten container
+      - source_labels:
+          - __meta_docker_container_name
+        regex: '/(.*)'
+        target_label: container
+
+      # Gan nhan ten service
+      - source_labels:
+          - __meta_docker_container_label_com_docker_compose_service
+        target_label: service
+
+      # Gan nhan job
+      - target_label: job
+        replacement: blog-cms

@@ -828,3 +828,181 @@ Dự án hướng đến xây dựng một hệ thống Blog/CMS hoàn chỉnh, 
 
 Việc tích hợp Nginx, Prometheus, Grafana và Loki giúp hệ thống đáp ứng các yêu cầu về Reverse Proxy, giám sát, quản lý log và bảo mật trong học phần Triển khai và Quản trị Hệ thống Phần mềm.
 
+\## Centralized Logging – Loki \& Promtail
+
+
+
+\### 1. Giới thiệu
+
+
+
+Hệ thống Blog CMS sử dụng Loki và Promtail để thu thập, lưu trữ và truy vấn log tập trung từ các Docker Container.
+
+
+
+Các thành phần:
+
+
+
+\- \*\*Promtail:\*\* Thu thập log từ Docker Containers.
+
+\- \*\*Loki:\*\* Tiếp nhận và lưu trữ log.
+
+\- \*\*Grafana:\*\* Hiển thị và tìm kiếm log bằng LogQL.
+
+
+
+\### 2. Khởi động hệ thống
+
+
+
+Chạy:
+
+
+
+```powershell
+
+docker compose up -d
+
+```
+
+
+
+Kiểm tra trạng thái:
+
+
+
+```powershell
+
+docker compose ps
+
+```
+
+
+
+Kiểm tra Loki:
+
+
+
+```powershell
+
+curl.exe -i http://localhost:3100/ready
+
+```
+
+
+
+Kết quả mong đợi: `HTTP/1.1 200 OK`.
+
+
+
+\### 3. Truy cập Grafana
+
+
+
+Địa chỉ:
+
+
+
+http://localhost:3000
+
+
+
+Vào \*\*Explore\*\*, chọn Data Source `loki`.
+
+
+
+\### 4. Truy vấn LogQL
+
+
+
+\*\*Log WordPress:\*\*
+
+
+
+```logql
+
+{job="blog-cms", service="wordpress"}
+
+```
+
+
+
+\*\*Log MySQL:\*\*
+
+
+
+```logql
+
+{job="blog-cms", service="db"}
+
+```
+
+
+
+\*\*Log Nginx:\*\*
+
+
+
+```logql
+
+{job="blog-cms", service="nginx"}
+
+```
+
+
+
+\*\*Lọc HTTP GET của Nginx:\*\*
+
+
+
+```logql
+
+{job="blog-cms", service="nginx"} |= "GET"
+
+```
+
+
+
+\*\*Lọc các thông báo lỗi của MySQL:\*\*
+
+
+
+```logql
+
+{job="blog-cms", service="db"} |\~ "(?i)error"
+
+```
+
+
+
+\### 5. Kết quả kiểm thử
+
+
+
+\- WordPress: Đã truy vấn thành công log trong Grafana.
+
+\- Nginx: Đã truy vấn thành công log HTTP trong Grafana.
+
+\- MySQL: Docker có log khởi động, nhưng chưa xác nhận được các dòng log MySQL trong kết quả truy vấn Grafana tại thời điểm kiểm thử.
+
+
+
+Lưu ý: MySQL không mặc định ghi mọi truy vấn SQL ra Docker logs. Vì vậy, việc không có log mới không đồng nghĩa MySQL ngừng hoạt động.
+
+
+
+\### 6. Lưu ý bảo mật
+
+
+
+Loki chỉ mở cổng `3100` trên `127.0.0.1` của máy chạy Docker.
+
+
+
+Promtail sử dụng Docker socket để thu thập log. Docker socket là tài nguyên có quyền truy cập cao, chỉ phù hợp với môi trường thực hành đáng tin cậy trong cấu hình hiện tại.
+
+
+
+Không đưa file `.env` chứa mật khẩu thật lên GitHub.
+

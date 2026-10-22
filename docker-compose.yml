@@ -1,5 +1,42 @@
 services:
+  # =====================================
+  # LOKI - LOG AGGREGATION
+  # =====================================
+  loki:
+    image: grafana/loki:3.7.0
+    restart: unless-stopped
 
+    command:
+      - -config.file=/etc/loki/loki-config.yml
+
+    ports:
+      - "127.0.0.1:3100:3100"
+
+    volumes:
+      - ./loki/loki-config.yml:/etc/loki/loki-config.yml:ro
+      - loki_data:/loki
+
+    networks:
+      - cms_monitoring
+  # =====================================
+  # 11. PROMTAIL - LOG COLLECTION
+  # =====================================
+  promtail:
+    image: grafana/promtail:3.6.11
+    restart: unless-stopped
+
+    command:
+      - -config.file=/etc/promtail/promtail-config.yml
+
+    volumes:
+      - ./promtail/promtail-config.yml:/etc/promtail/promtail-config.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+    depends_on:
+      - loki
+
+    networks:
+      - cms_monitoring
   # ==================================
   # 1. MYSQL DATABASE
   # ==================================
@@ -221,3 +258,4 @@ volumes:
   wordpress_data:
   prometheus_data:
   grafana_data:
+  loki_data:
