@@ -1,0 +1,31 @@
+# Environment variables and passwords
+.env
+.env.*
+!.env.example
+
+# Database backups
+backups/
+*.sql.gz
+
+# Log files
+*.log
+logs/
+
+# Private keys and certificates
+*.key
+*.pem
+
+# Temporary files
+*.tmp
+*.bak
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
