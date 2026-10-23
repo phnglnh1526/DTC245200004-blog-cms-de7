@@ -29,3 +29,5 @@ Desktop.ini
 # IDE
 .vscode/
 .idea/
+# Local HTTPS certificates
+/nginx/ssl/

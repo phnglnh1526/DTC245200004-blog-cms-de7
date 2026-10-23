@@ -1006,3 +1006,59 @@ Promtail sử dụng Docker socket để thu thập log. Docker socket là tài 
 
 Không đưa file `.env` chứa mật khẩu thật lên GitHub.
 
+## HTTPS & Security Hardening
+
+### HTTPS
+
+Hệ thống Blog CMS sử dụng Nginx Reverse Proxy và chứng chỉ SSL tự ký.
+
+- HTTP: `http://localhost:8080`
+- HTTPS: `https://localhost:8443`
+- HTTP được chuyển hướng tự động sang HTTPS.
+- Hỗ trợ TLS 1.2 và TLS 1.3.
+
+### Tạo chứng chỉ SSL
+
+Trước khi khởi động hệ thống lần đầu, mở PowerShell tại thư mục dự án và chạy:
+
+```powershell
+New-Item -ItemType Directory -Path .\nginx\ssl -Force
+```
+
+```powershell
+docker run --rm -v "${PWD}/nginx/ssl:/certs" alpine/openssl:3.5.9 req -x509 -newkey rsa:2048 -sha256 -noenc -days 365 -keyout /certs/localhost.key -out /certs/localhost.crt -subj "/CN=localhost" -addext "subjectAltName=DNS:localhost,IP:127.0.0.1"
+```
+
+Sau đó khởi động:
+
+```powershell
+docker compose up -d
+```
+
+Khi cài WordPress lần đầu, sử dụng địa chỉ `https://localhost:8443`. Nếu WordPress đã cài với URL HTTP, cần cập nhật WordPress Address và Site Address sang địa chỉ HTTPS.
+
+Chứng chỉ tự ký phục vụ môi trường thực hành localhost. Trình duyệt có thể cảnh báo chứng chỉ chưa được tin cậy.
+
+### Các biện pháp bảo mật
+
+1. HTTPS với TLS 1.2/1.3.
+2. Security Headers: `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`.
+3. Ẩn phiên bản Nginx và header `X-Powered-By`.
+4. Chặn truy cập `.env`, `.git` và `wp-config.php`.
+5. Giới hạn truy cập các cổng dịch vụ qua localhost.
+6. Chuyển hướng HTTP sang HTTPS.
+7. Cấu hình giới hạn yêu cầu đăng nhập WordPress bằng Nginx.
+
+### Kiểm tra bảo mật
+
+```powershell
+curl.exe -k -I https://localhost:8443
+curl.exe -I http://localhost:8080
+curl.exe -k -I https://localhost:8443/.env
+curl.exe -k -I https://localhost:8443/.git/config
+curl.exe -k -I https://localhost:8443/wp-config.php
+```
+
+Kết quả kiểm thử đã xác nhận HTTPS trả về `200`, HTTP chuyển hướng `301` và các đường dẫn nhạy cảm trả về `404`.
+
+Rate Limiting cần được kiểm thử riêng trước khi kết luận hoạt động đúng.
