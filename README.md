@@ -1,1064 +1,189 @@
-\# HỆ THỐNG BLOG/CMS – ĐỀ TÀI SỐ 7
+[readme_md.md](https://github.com/user-attachments/files/33905244/readme_md.md)
+# 📝 HỆ THỐNG BLOG/CMS – ĐỀ TÀI SỐ 7
 
+## 1. Giới thiệu
 
+* **Học phần:** Triển khai và Quản trị Hệ thống Phần mềm
+* **Đề tài:** Triển khai hệ thống Blog/CMS sử dụng Docker Compose, MySQL, phpMyAdmin, Nginx, Prometheus, Grafana và Loki.
+* **Mã số sinh viên:** DTC245200004
 
-\## 1. Giới thiệu
+### 🎯 Mục tiêu
+Xây dựng và triển khai một hệ thống quản lý nội dung Blog/CMS hoàn chỉnh dựa trên **WordPress**. Hệ thống ứng dụng container hóa toàn diện với **Docker Compose**, sử dụng **Nginx** làm Reverse Proxy để định tuyến và bảo mật.
 
+Dự án được thiết kế để dễ dàng mở rộng, tích hợp sẵn hệ thống giám sát (Prometheus, Grafana), hệ thống quản lý log tập trung (Loki, Promtail) và áp dụng các tiêu chuẩn bảo mật cơ bản (HTTPS, Security Headers).
 
+---
 
-\*\*Học phần:\*\* Triển khai và Quản trị Hệ thống Phần mềm
+## 2. Công nghệ sử dụng
 
-
-
-\*\*Đề tài:\*\* Triển khai hệ thống Blog/CMS sử dụng Docker Compose, MySQL, phpMyAdmin, Nginx, Prometheus, Grafana và Loki.
-
-
-
-\*\*Mã số sinh viên:\*\* DTC245200004
-
-
-
-\### Mục tiêu
-
-
-
-Xây dựng và triển khai hệ thống quản lý nội dung Blog/CMS bằng WordPress.
-
-
-
-Hệ thống sử dụng Docker Compose để quản lý các dịch vụ, MySQL để lưu trữ dữ liệu và Nginx làm Reverse Proxy.
-
-
-
-Các giai đoạn tiếp theo sẽ tích hợp hệ thống giám sát Prometheus, Grafana và hệ thống log tập trung Loki, Promtail.
-
-
-
-Dự án đồng thời áp dụng các biện pháp bảo mật và quản lý mã nguồn trên GitHub.
-
-
-
-\---
-
-
-
-\## 2. Công nghệ sử dụng
-
-
-
+### 🛠 Hệ thống cốt lõi
 | Công nghệ | Chức năng |
-
 |---|---|
+| **Docker / Compose** | Đóng gói, chạy container và quản lý các dịch vụ |
+| **WordPress** | Nền tảng Website Blog/CMS |
+| **MySQL 8.4** | Hệ quản trị cơ sở dữ liệu |
+| **phpMyAdmin** | Giao diện quản trị cơ sở dữ liệu MySQL |
+| **Nginx** | Web Server & Reverse Proxy |
+| **Git & GitHub** | Quản lý phiên bản, lưu trữ mã nguồn và cấu hình |
 
-| Docker | Đóng gói và chạy container |
-
-| Docker Compose | Quản lý các dịch vụ |
-
-| WordPress | Website Blog/CMS |
-
-| MySQL 8.4 | Lưu trữ cơ sở dữ liệu |
-
-| phpMyAdmin | Quản trị MySQL |
-
-| Nginx | Reverse Proxy |
-
-| Git | Quản lý phiên bản |
-
-| GitHub | Lưu trữ mã nguồn và cấu hình |
-
-
-
-\### Công nghệ dự kiến tích hợp
-
-
-
+### 📊 Hệ thống giám sát & Logs (Monitoring & Logging)
 | Công nghệ | Chức năng |
-
 |---|---|
+| **Prometheus** | Thu thập Metrics từ các hệ thống |
+| **Grafana** | Bảng điều khiển (Dashboard) trực quan hóa giám sát |
+| **cAdvisor / Exporters**| Giám sát Docker Containers, Nginx và MySQL |
+| **Loki** | Lưu trữ và truy vấn Logs tập trung |
+| **Promtail** | Thu thập Logs từ các container chuyển về Loki |
+| **LogQL** | Ngôn ngữ truy vấn Logs chuyên dụng |
 
-| Prometheus | Thu thập Metrics |
+---
 
-| Grafana | Trực quan hóa giám sát |
-
-| cAdvisor | Giám sát Docker Containers |
-
-| Nginx Exporter | Giám sát Nginx |
-
-| MySQL Exporter | Giám sát MySQL |
-
-| Loki | Lưu trữ và truy vấn Logs |
-
-| Promtail | Thu thập Logs |
-
-| LogQL | Ngôn ngữ truy vấn Logs |
-
-
-
-\---
-
-
-
-\## 3. Kiến trúc hệ thống
-
-
-
-Kiến trúc hiện tại:
-
-
+## 3. Kiến trúc hệ thống
 
 ```text
-
-&#x20;            Người dùng
-
-&#x20;                 |
-
-&#x20;                 |
-
-&#x20;         http://localhost:8080
-
-&#x20;                 |
-
-&#x20;                 v
-
-&#x20;         +---------------+
-
-&#x20;         |     NGINX     |
-
-&#x20;         | Reverse Proxy |
-
-&#x20;         +---------------+
-
-&#x20;                 |
-
-&#x20;                 v
-
-&#x20;         +---------------+
-
-&#x20;         |   WORDPRESS   |
-
-&#x20;         |    Blog CMS   |
-
-&#x20;         +---------------+
-
-&#x20;                 |
-
-&#x20;                 v
-
-&#x20;         +---------------+
-
-&#x20;         |     MYSQL     |
-
-&#x20;         |   Database    |
-
-&#x20;         +---------------+
-
-&#x20;                 ^
-
-&#x20;                 |
-
-&#x20;         +---------------+
-
-&#x20;         |  phpMyAdmin   |
-
-&#x20;         |  Quản trị DB  |
-
-&#x20;         +---------------+
-
+            Người dùng
+                 |
+                 v (HTTPS: 8443 / HTTP: 8080)
+         +---------------+
+         |     NGINX     |
+         | Reverse Proxy |
+         +---------------+
+                 |
+                 v
+         +---------------+
+         |   WORDPRESS   |
+         |    Blog CMS   |
+         +---------------+
+                 |
+                 v
+         +---------------+         +---------------+
+         |     MYSQL     | <------ |  phpMyAdmin   |
+         |   Database    |         |  Quản trị DB  |
+         +---------------+         +---------------+
 ```
 
+**Nguyên lý hoạt động:**
+1. Người dùng truy cập website qua Nginx (hỗ trợ tự động chuyển hướng HTTP sang HTTPS).
+2. Nginx đóng vai trò Reverse Proxy, chuyển tiếp HTTP Request đến container WordPress.
+3. WordPress xử lý yêu cầu, truy vấn dữ liệu từ MySQL và trả phản hồi lại cho người dùng thông qua Nginx.
+4. Quản trị viên có thể sử dụng phpMyAdmin để quản lý trực tiếp cơ sở dữ liệu qua một cổng riêng biệt.
 
+---
 
-\### Nguyên lý hoạt động
-
-
-
-1\. Người dùng truy cập website qua Nginx.
-
-2\. Nginx chuyển tiếp HTTP Request đến WordPress.
-
-3\. WordPress xử lý yêu cầu và truy vấn MySQL.
-
-4\. MySQL trả dữ liệu về WordPress.
-
-5\. WordPress gửi phản hồi thông qua Nginx.
-
-6\. Người quản trị sử dụng phpMyAdmin để kiểm tra và quản lý cơ sở dữ liệu.
-
-
-
-\---
-
-
-
-\## 4. Chức năng hệ thống Blog/CMS
-
-
-
-Hệ thống sử dụng WordPress với các chức năng:
-
-
-
-\- Đăng nhập và quản trị website.
-
-\- Tạo và xuất bản bài viết.
-
-\- Chỉnh sửa và xóa bài viết.
-
-\- Quản lý danh mục.
-
-\- Quản lý người dùng.
-
-\- Phân quyền người dùng theo vai trò.
-
-\- Quản lý nội dung và hình ảnh.
-
-\- Tìm kiếm bài viết.
-
-
-
-\---
-
-
-
-\## 5. Cấu trúc thư mục dự án
-
-
+## 4. Cấu trúc thư mục
 
 ```text
-
 blog-cms-de7/
-
-|
-
-|-- docker-compose.yml
-
-|-- .env.example
-
-|-- .gitignore
-
-|-- README.md
-
-|
-
-|-- nginx/
-
-|   |-- conf.d/
-
-|       |-- default.conf
-
-|
-
-|-- prometheus/
-
-|-- grafana/
-
-|   |-- dashboards/
-
-|   |-- provisioning/
-
-|       |-- datasources/
-
-|
-
-|-- loki/
-
-|-- promtail/
-
-|-- database/
-
-|-- scripts/
-
-|-- docs/
-
-&#x20;   |-- screenshots/
-
+├── docker-compose.yml
+├── .env.example
+├── .gitignore
+├── README.md
+├── nginx/
+│   ├── conf.d/
+│   │   └── default.conf
+│   └── ssl/                 # Nơi lưu trữ chứng chỉ SSL
+├── prometheus/
+├── grafana/
+│   ├── dashboards/
+│   └── provisioning/
+├── loki/
+├── promtail/
+├── database/
+├── scripts/
+└── docs/
 ```
+*(Lưu ý: Dữ liệu phát sinh của WordPress và MySQL được lưu trong Docker Volumes và không được đẩy lên GitHub để đảm bảo an toàn).*
 
+---
 
+## 5. Hướng dẫn triển khai
 
-Các thư mục Prometheus, Grafana, Loki và Promtail được chuẩn bị cho những giai đoạn triển khai tiếp theo.
+### Yêu cầu môi trường
+* Windows 11 / WSL 2 / Docker Desktop (chế độ Linux Containers).
+* Git, Trình duyệt web (Chrome/Edge).
 
-
-
-WordPress sử dụng Docker Image chính thức. Dữ liệu phát sinh trong quá trình sử dụng được lưu trong Docker Volumes, không đưa lên GitHub.
-
-
-
-\---
-
-
-
-\## 6. Yêu cầu môi trường
-
-
-
-Hệ thống được triển khai và kiểm thử trên:
-
-
-
-\- Windows 11.
-
-\- Docker Desktop.
-
-\- WSL 2.
-
-\- Docker Compose.
-
-\- Git.
-
-\- Google Chrome.
-
-
-
-Docker Desktop cần được khởi động ở chế độ Linux Containers.
-
-
-
-\---
-
-
-
-\## 7. Hướng dẫn triển khai
-
-
-
-\### Bước 1. Clone Repository
-
-
-
-Mở PowerShell và chạy:
-
-
-
+### Bước 1: Clone Repository
 ```powershell
-
 git clone https://github.com/phnglnh1526/DTC245200004-blog-cms-de7.git
-
-```
-
-
-
-Di chuyển vào thư mục:
-
-
-
-```powershell
-
 cd DTC245200004-blog-cms-de7
-
 ```
 
-
-
-\### Bước 2. Cấu hình biến môi trường
-
-
-
-Tạo file `.env` từ file mẫu:
-
-
-
+### Bước 2: Cấu hình biến môi trường
+Tạo file `.env` từ file mẫu và thiết lập mật khẩu an toàn:
 ```powershell
-
 Copy-Item .env.example .env
-
-```
-
-
-
-Mở file:
-
-
-
-```powershell
-
 notepad .env
-
 ```
+*Lưu ý: Đổi các giá trị `CHANGE_ME_*` thành mật khẩu thực tế của bạn.*
 
-
-
-Thay các mật khẩu mẫu bằng mật khẩu mạnh.
-
-
-
-Các biến cần thiết:
-
-
-
-```env
-
-MYSQL\_ROOT\_PASSWORD=CHANGE\_ME\_ROOT\_PASSWORD
-
-MYSQL\_DATABASE=blogcms
-
-MYSQL\_USER=bloguser
-
-MYSQL\_PASSWORD=CHANGE\_ME\_USER\_PASSWORD
-
-```
-
-
-
-Không sử dụng nguyên các mật khẩu mẫu khi triển khai.
-
-
-
-\### Bước 3. Kiểm tra Docker Compose
-
-
-
-```powershell
-
-docker compose config --quiet
-
-```
-
-
-
-Nếu không có lỗi, tiếp tục triển khai.
-
-
-
-\### Bước 4. Khởi động hệ thống
-
-
-
-```powershell
-
-docker compose up -d
-
-```
-
-
-
-Kiểm tra trạng thái:
-
-
-
-```powershell
-
-docker compose ps
-
-```
-
-
-
-\### Bước 5. Cài đặt WordPress lần đầu
-
-
-
-Truy cập:
-
-
-
-```text
-
-http://localhost:8080
-
-```
-
-
-
-Nếu là lần khởi chạy mới, WordPress sẽ hiển thị giao diện cài đặt.
-
-
-
-Thực hiện:
-
-
-
-1\. Chọn ngôn ngữ Tiếng Việt.
-
-2\. Nhập tên website.
-
-3\. Tạo tài khoản quản trị.
-
-4\. Thiết lập mật khẩu mạnh.
-
-5\. Nhập email quản trị.
-
-6\. Hoàn tất cài đặt WordPress.
-
-
-
-\---
-
-
-
-\## 8. Địa chỉ truy cập
-
-
-
-| Dịch vụ | Địa chỉ |
-
-|---|---|
-
-| Website Blog/CMS | http://localhost:8080 |
-
-| WordPress Admin | http://localhost:8080/wp-admin |
-
-| phpMyAdmin | http://localhost:8081 |
-
-
-
-MySQL chỉ được truy cập qua mạng Docker nội bộ.
-
-
-
-WordPress không công bố trực tiếp cổng HTTP ra máy Windows.
-
-
-
-\---
-
-
-
-\## 9. Nginx Reverse Proxy
-
-
-
-Nginx được sử dụng để chuyển tiếp HTTP Request đến WordPress.
-
-
-
-Địa chỉ truy cập chính:
-
-
-
-```text
-
-http://localhost:8080
-
-```
-
-
-
-Nginx chuyển request đến:
-
-
-
-```text
-
-http://wordpress:80
-
-```
-
-
-
-\### Security Headers
-
-
-
-Hệ thống sử dụng các HTTP Security Headers:
-
-
-
-```nginx
-
-add\_header X-Content-Type-Options "nosniff" always;
-
-add\_header X-Frame-Options "SAMEORIGIN" always;
-
-add\_header Referrer-Policy "strict-origin-when-cross-origin" always;
-
-```
-
-
-
-Kiểm tra bằng PowerShell:
-
-
-
-```powershell
-
-curl.exe -I http://localhost:8080
-
-```
-
-
-
-Cấu hình Nginx được lưu tại:
-
-
-
-```text
-
-nginx/conf.d/default.conf
-
-```
-
-
-
-\---
-
-
-
-\## 10. Bảo mật hệ thống
-
-
-
-Các biện pháp bảo mật đã được cấu hình ở giai đoạn đầu:
-
-
-
-\- Sử dụng Nginx Unprivileged Image.
-
-\- Phân chia mạng frontend và backend.
-
-\- Không công khai cổng MySQL ra host.
-
-\- Không công khai trực tiếp cổng WordPress.
-
-\- Sử dụng HTTP Security Headers.
-
-\- Sử dụng mật khẩu riêng cho Database.
-
-\- Không đưa file `.env` chứa mật khẩu lên GitHub.
-
-
-
-Các biện pháp bảo mật sẽ tiếp tục được kiểm thử và hoàn thiện ở giai đoạn Hardening.
-
-
-
-\---
-
-
-
-\## 11. Kiểm tra và quản lý Containers
-
-
-
-Kiểm tra các dịch vụ:
-
-
-
-```powershell
-
-docker compose ps
-
-```
-
-
-
-Xem log:
-
-
-
-```powershell
-
-docker compose logs
-
-```
-
-
-
-Xem log WordPress:
-
-
-
-```powershell
-
-docker compose logs wordpress
-
-```
-
-
-
-Xem log Nginx:
-
-
-
-```powershell
-
-docker compose logs nginx
-
-```
-
-
-
-Dừng hệ thống:
-
-
-
-```powershell
-
-docker compose down
-
-```
-
-
-
-Khởi động lại:
-
-
-
-```powershell
-
-docker compose up -d
-
-```
-
-
-
-Lưu ý: Không sử dụng tùy chọn `-v` với lệnh `docker compose down` nếu chưa sao lưu dữ liệu, vì tùy chọn này có thể xóa Docker Volumes của dự án.
-
-
-
-\---
-
-
-
-\## 12. Các giai đoạn triển khai
-
-
-
-\### Commit 1 – Website và Reverse Proxy
-
-
-
-\- Triển khai WordPress.
-
-\- Triển khai MySQL.
-
-\- Tích hợp phpMyAdmin.
-
-\- Cấu hình Nginx Reverse Proxy.
-
-\- Cấu hình Security Headers.
-
-\- Quản lý cấu hình bằng GitHub.
-
-\- Viết README.
-
-
-
-\### Commit 2 – Monitoring
-
-
-
-Dự kiến triển khai:
-
-
-
-\- Prometheus.
-
-\- Grafana.
-
-\- cAdvisor.
-
-\- Nginx Exporter.
-
-\- MySQL Exporter.
-
-\- Dashboard giám sát Container, Web Server và Database.
-
-
-
-\### Commit 3 – Centralized Logging
-
-
-
-Dự kiến triển khai:
-
-
-
-\- Loki.
-
-\- Promtail.
-
-\- Tích hợp Loki với Grafana.
-
-\- Truy vấn Logs bằng LogQL.
-
-\- Hoàn thiện Hardening hệ thống.
-
-
-
-\---
-
-
-
-\## 13. Kiểm thử
-
-
-
-Các nội dung kiểm thử bao gồm:
-
-
-
-\- Truy cập website Blog/CMS.
-
-\- Đăng nhập WordPress Administrator.
-
-\- Tạo và xuất bản bài viết.
-
-\- Quản lý danh mục.
-
-\- Kiểm tra dữ liệu bài viết bằng phpMyAdmin.
-
-\- Kiểm tra kết nối MySQL.
-
-\- Kiểm tra Nginx Reverse Proxy.
-
-\- Kiểm tra Security Headers.
-
-\- Kiểm tra trạng thái Docker Containers.
-
-\- Kiểm tra dữ liệu sau khi khởi động lại Containers.
-
-
-
-Các giai đoạn tiếp theo sẽ bổ sung kiểm thử Metrics, Dashboard, LogQL và Hardening.
-
-
-
-\---
-
-
-
-\## 14. Kết luận
-
-
-
-Dự án hướng đến xây dựng một hệ thống Blog/CMS hoàn chỉnh, có khả năng triển khai và vận hành bằng Docker Compose.
-
-
-
-Việc tích hợp Nginx, Prometheus, Grafana và Loki giúp hệ thống đáp ứng các yêu cầu về Reverse Proxy, giám sát, quản lý log và bảo mật trong học phần Triển khai và Quản trị Hệ thống Phần mềm.
-
-\## Centralized Logging – Loki \& Promtail
-
-
-
-\### 1. Giới thiệu
-
-
-
-Hệ thống Blog CMS sử dụng Loki và Promtail để thu thập, lưu trữ và truy vấn log tập trung từ các Docker Container.
-
-
-
-Các thành phần:
-
-
-
-\- \*\*Promtail:\*\* Thu thập log từ Docker Containers.
-
-\- \*\*Loki:\*\* Tiếp nhận và lưu trữ log.
-
-\- \*\*Grafana:\*\* Hiển thị và tìm kiếm log bằng LogQL.
-
-
-
-\### 2. Khởi động hệ thống
-
-
-
-Chạy:
-
-
-
-```powershell
-
-docker compose up -d
-
-```
-
-
-
-Kiểm tra trạng thái:
-
-
-
-```powershell
-
-docker compose ps
-
-```
-
-
-
-Kiểm tra Loki:
-
-
-
-```powershell
-
-curl.exe -i http://localhost:3100/ready
-
-```
-
-
-
-Kết quả mong đợi: `HTTP/1.1 200 OK`.
-
-
-
-\### 3. Truy cập Grafana
-
-
-
-Địa chỉ:
-
-
-
-http://localhost:3000
-
-
-
-Vào \*\*Explore\*\*, chọn Data Source `loki`.
-
-
-
-\### 4. Truy vấn LogQL
-
-
-
-\*\*Log WordPress:\*\*
-
-
-
-```logql
-
-{job="blog-cms", service="wordpress"}
-
-```
-
-
-
-\*\*Log MySQL:\*\*
-
-
-
-```logql
-
-{job="blog-cms", service="db"}
-
-```
-
-
-
-\*\*Log Nginx:\*\*
-
-
-
-```logql
-
-{job="blog-cms", service="nginx"}
-
-```
-
-
-
-\*\*Lọc HTTP GET của Nginx:\*\*
-
-
-
-```logql
-
-{job="blog-cms", service="nginx"} |= "GET"
-
-```
-
-
-
-\*\*Lọc các thông báo lỗi của MySQL:\*\*
-
-
-
-```logql
-
-{job="blog-cms", service="db"} |\~ "(?i)error"
-
-```
-
-
-
-\### 5. Kết quả kiểm thử
-
-
-
-\- WordPress: Đã truy vấn thành công log trong Grafana.
-
-\- Nginx: Đã truy vấn thành công log HTTP trong Grafana.
-
-\- MySQL: Docker có log khởi động, nhưng chưa xác nhận được các dòng log MySQL trong kết quả truy vấn Grafana tại thời điểm kiểm thử.
-
-
-
-Lưu ý: MySQL không mặc định ghi mọi truy vấn SQL ra Docker logs. Vì vậy, việc không có log mới không đồng nghĩa MySQL ngừng hoạt động.
-
-
-
-\### 6. Lưu ý bảo mật
-
-
-
-Loki chỉ mở cổng `3100` trên `127.0.0.1` của máy chạy Docker.
-
-
-
-Promtail sử dụng Docker socket để thu thập log. Docker socket là tài nguyên có quyền truy cập cao, chỉ phù hợp với môi trường thực hành đáng tin cậy trong cấu hình hiện tại.
-
-
-
-Không đưa file `.env` chứa mật khẩu thật lên GitHub.
-
-## HTTPS & Security Hardening
-
-### HTTPS
-
-Hệ thống Blog CMS sử dụng Nginx Reverse Proxy và chứng chỉ SSL tự ký.
-
-- HTTP: `http://localhost:8080`
-- HTTPS: `https://localhost:8443`
-- HTTP được chuyển hướng tự động sang HTTPS.
-- Hỗ trợ TLS 1.2 và TLS 1.3.
-
-### Tạo chứng chỉ SSL
-
-Trước khi khởi động hệ thống lần đầu, mở PowerShell tại thư mục dự án và chạy:
-
+### Bước 3: Tạo chứng chỉ SSL (Tự ký cho localhost)
+Chạy các lệnh sau để tạo thư mục chứa SSL và sinh chứng chỉ:
 ```powershell
 New-Item -ItemType Directory -Path .\nginx\ssl -Force
-```
 
-```powershell
 docker run --rm -v "${PWD}/nginx/ssl:/certs" alpine/openssl:3.5.9 req -x509 -newkey rsa:2048 -sha256 -noenc -days 365 -keyout /certs/localhost.key -out /certs/localhost.crt -subj "/CN=localhost" -addext "subjectAltName=DNS:localhost,IP:127.0.0.1"
 ```
 
-Sau đó khởi động:
-
+### Bước 4: Khởi động hệ thống
 ```powershell
-docker compose up -d
+docker compose config --quiet  # Kiểm tra lỗi cú pháp
+docker compose up -d           # Khởi động ở chế độ chạy ngầm
+docker compose ps              # Kiểm tra trạng thái các container
 ```
 
-Khi cài WordPress lần đầu, sử dụng địa chỉ `https://localhost:8443`. Nếu WordPress đã cài với URL HTTP, cần cập nhật WordPress Address và Site Address sang địa chỉ HTTPS.
+### Bước 5: Thiết lập WordPress lần đầu
+1. Truy cập: `https://localhost:8443` (Chấp nhận cảnh báo bảo mật do dùng SSL tự ký).
+2. Hoàn tất các bước cài đặt WordPress trên giao diện (chọn ngôn ngữ, tạo tài khoản quản trị).
 
-Chứng chỉ tự ký phục vụ môi trường thực hành localhost. Trình duyệt có thể cảnh báo chứng chỉ chưa được tin cậy.
+---
 
-### Các biện pháp bảo mật
+## 6. Địa chỉ truy cập & Quản lý
 
-1. HTTPS với TLS 1.2/1.3.
-2. Security Headers: `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`.
-3. Ẩn phiên bản Nginx và header `X-Powered-By`.
-4. Chặn truy cập `.env`, `.git` và `wp-config.php`.
-5. Giới hạn truy cập các cổng dịch vụ qua localhost.
-6. Chuyển hướng HTTP sang HTTPS.
-7. Cấu hình giới hạn yêu cầu đăng nhập WordPress bằng Nginx.
+| Dịch vụ | Địa chỉ truy cập |
+|---|---|
+| **Website Blog** | `https://localhost:8443` (Chính) hoặc `http://localhost:8080` |
+| **WordPress Admin**| `https://localhost:8443/wp-admin` |
+| **phpMyAdmin** | `http://localhost:8081` |
+| **Grafana** | `http://localhost:3000` |
 
-### Kiểm tra bảo mật
+### Các lệnh quản lý cơ bản
+* **Xem log toàn hệ thống:** `docker compose logs`
+* **Xem log từng dịch vụ:** `docker compose logs wordpress` hoặc `docker compose logs nginx`
+* **Dừng hệ thống:** `docker compose down` (Không dùng `-v` nếu không muốn mất dữ liệu).
 
+---
+
+## 7. Giám sát & Logging Tập Trung (Monitoring & Centralized Logging)
+
+Hệ thống sử dụng **Loki** và **Promtail** để thu thập log từ tất cả các container.
+* Loki tiếp nhận log tại cổng `3100` (chỉ nội bộ localhost).
+* Truy cập **Grafana** (`http://localhost:3000`) -> **Explore** -> Chọn Data Source là `loki`.
+
+**Một số câu lệnh LogQL hữu ích:**
+* Log Nginx: `{job="blog-cms", service="nginx"}`
+* Lọc lỗi MySQL: `{job="blog-cms", service="db"} |~ "(?i)error"`
+
+---
+
+## 8. Bảo mật & Hardening (HTTPS & Security)
+
+Dự án áp dụng các tiêu chuẩn bảo mật nhằm hạn chế rủi ro:
+1. **HTTPS Enforced:** Hỗ trợ TLS 1.2/1.3, tự động chuyển hướng HTTP (8080) sang HTTPS (8443).
+2. **Security Headers Nginx:** Được cấu hình sẵn (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`).
+3. **Ẩn thông tin Server:** Ẩn phiên bản Nginx và header `X-Powered-By`.
+4. **Bảo vệ file nhạy cảm:** Nginx tự động chặn (`404`) các truy cập vào `.env`, `.git`, và `wp-config.php`.
+5. **Network Isolation:** MySQL chỉ giao tiếp nội bộ trong Docker Network, không mở cổng ra Host.
+
+**Kiểm tra bảo mật:**
 ```powershell
-curl.exe -k -I https://localhost:8443
-curl.exe -I http://localhost:8080
-curl.exe -k -I https://localhost:8443/.env
-curl.exe -k -I https://localhost:8443/.git/config
-curl.exe -k -I https://localhost:8443/wp-config.php
+curl.exe -k -I https://localhost:8443/.env         # Phải trả về 404
+curl.exe -I http://localhost:8080                  # Phải trả về 301 Moved Permanently
 ```
 
-Kết quả kiểm thử đã xác nhận HTTPS trả về `200`, HTTP chuyển hướng `301` và các đường dẫn nhạy cảm trả về `404`.
+---
 
-Rate Limiting cần được kiểm thử riêng trước khi kết luận hoạt động đúng.
+## 9. Các giai đoạn triển khai (Roadmap)
+- [x] **Giai đoạn 1:** Triển khai Website (WordPress, MySQL, Nginx Proxy), cấu hình GitHub, viết README.
+- [x] **Giai đoạn 2:** Tích hợp HTTPS & Security Hardening cơ bản.
+- [x] **Giai đoạn 3:** Centralized Logging (Loki, Promtail) tích hợp Grafana.
+- [ ] **Giai đoạn 4 (Sắp tới):** Hoàn thiện Prometheus & cấu hình cảnh báo tài nguyên (Alerts).
